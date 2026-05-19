@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đánh giá AI Agent — Cẩm nang chi tiết</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F1E8;
+    --bg-warm:#EFE9DB;
+    --ink:#1A1814;
+    --ink-soft:#3A3530;
+    --muted:#6B635A;
+    --rule:#D9D1BF;
+    --accent:#B8431C;
+    --accent-soft:#E8C4AC;
+    --highlight:#F2D896;
+    --paper:#FBF8F1;
+    --code-bg:#2A2520;
+    --code-ink:#E8DFCE;
+    --teal:#2D5F5D;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-size:17px;
+    line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+
+  /* ============ HERO ============ */
+  .hero{
+    min-height:90vh;
+    padding:80px 40px 60px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    position:relative;
+    overflow:hidden;
+    border-bottom:1px solid var(--rule);
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(184,67,28,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(45,95,93,0.06) 0%, transparent 50%);
+    pointer-events:none;
+  }
+  .hero-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    position:relative;
+    z-index:1;
+  }
+  .hero-meta-left{display:flex;flex-direction:column;gap:6px}
+  .hero-meta strong{color:var(--ink);font-weight:600}
+  .hero-center{
+    max-width:1000px;
+    margin:60px auto;
+    text-align:center;
+    position:relative;
+    z-index:1;
+  }
+  .hero-eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    letter-spacing:0.3em;
+    color:var(--accent);
+    text-transform:uppercase;
+    margin-bottom:24px;
+    display:inline-block;
+    padding:8px 20px;
+    border:1px solid var(--accent);
+    border-radius:100px;
+  }
+  .hero h1{
+    font-family:'Fraunces',serif;
+    font-weight:400;
+    font-size:clamp(48px,8vw,112px);
+    line-height:0.95;
+    letter-spacing:-0.03em;
+    color:var(--ink);
+    font-variation-settings:'opsz' 144;
+    margin-bottom:32px;
+  }
+  .hero h1 em{
+    font-style:italic;
+    font-weight:300;
+    color:var(--accent);
+  }
+  .hero-sub{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:300;
+    font-size:clamp(20px,2.5vw,28px);
+    color:var(--ink-soft);
+    max-width:720px;
+    margin:0 auto 40px;
+    line-height:1.4;
+  }
+  .hero-author{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.15em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  .hero-author span{color:var(--ink);font-weight:500}
+  .hero-bottom{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:40px;
+    position:relative;
+    z-index:1;
+    border-top:1px solid var(--rule);
+    padding-top:32px;
+  }
+  .hero-stat{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+  }
+  .hero-stat strong{
+    display:block;
+    font-family:'Fraunces',serif;
+    font-size:28px;
+    font-style:normal;
+    font-weight:400;
+    color:var(--ink);
+    margin-bottom:4px;
+    letter-spacing:-0.02em;
+  }
+
+  /* ============ TOC ============ */
+  .toc{
+    max-width:900px;
+    margin:0 auto;
+    padding:80px 40px;
+    border-bottom:1px solid var(--rule);
+  }
+  .toc-title{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:32px;
+  }
+  .toc-list{
+    list-style:none;
+    counter-reset:toc;
+  }
+  .toc-list li{
+    counter-increment:toc;
+    border-top:1px solid var(--rule);
+    padding:20px 0;
+    display:flex;
+    align-items:baseline;
+    gap:24px;
+  }
+  .toc-list li::before{
+    content:counter(toc,decimal-leading-zero);
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    color:var(--accent);
+    min-width:40px;
+  }
+  .toc-list a{
+    color:var(--ink);
+    text-decoration:none;
+    font-family:'Fraunces',serif;
+    font-size:24px;
+    flex:1;
+    transition:color 0.2s;
+  }
+  .toc-list a:hover{color:var(--accent)}
+  .toc-list span{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+  }
+
+  /* ============ MAIN CONTENT ============ */
+  main{
+    max-width:780px;
+    margin:0 auto;
+    padding:80px 40px;
+  }
+  .section{margin-bottom:120px}
+  .section-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--accent);
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    margin-bottom:16px;
+    display:block;
+  }
+  h2{
+    font-family:'Fraunces',serif;
+    font-weight:400;
+    font-size:clamp(36px,5vw,56px);
+    line-height:1.05;
+    letter-spacing:-0.025em;
+    margin-bottom:40px;
+    color:var(--ink);
+  }
+  h2 em{font-style:italic;color:var(--accent);font-weight:300}
+  h3{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:32px;
+    line-height:1.2;
+    letter-spacing:-0.02em;
+    margin:64px 0 24px;
+    color:var(--ink);
+  }
+  h4{
+    font-family:'Be Vietnam Pro',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    line-height:1.4;
+    margin:40px 0 16px;
+    color:var(--accent);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  p{margin-bottom:24px;color:var(--ink-soft)}
+  p strong{color:var(--ink);font-weight:600}
+  p em{font-style:italic;color:var(--ink)}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent-soft);transition:border 0.2s}
+  a:hover{border-bottom-color:var(--accent)}
+
+  /* Drop cap for first paragraph */
+  .lede::first-letter{
+    font-family:'Fraunces',serif;
+    font-weight:400;
+    float:left;
+    font-size:88px;
+    line-height:0.85;
+    padding:6px 12px 0 0;
+    color:var(--accent);
+  }
+  .lede{font-size:19px;line-height:1.7}
+
+  /* Lists */
+  ul,ol{margin:0 0 24px 24px;color:var(--ink-soft)}
+  li{margin-bottom:10px}
+  ul li::marker{color:var(--accent)}
+  ol li::marker{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:14px}
+
+  /* Quote */
+  blockquote{
+    margin:40px -20px;
+    padding:32px 40px;
+    background:var(--bg-warm);
+    border-left:3px solid var(--accent);
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:21px;
+    line-height:1.5;
+    color:var(--ink);
+    position:relative;
+  }
+  blockquote::before{
+    content:"";
+    font-family:'Fraunces',serif;
+    font-size:80px;
+    color:var(--accent-soft);
+    position:absolute;
+    left:12px;
+    top:-10px;
+    line-height:1;
+  }
+  blockquote cite{
+    display:block;
+    margin-top:16px;
+    font-family:'JetBrains Mono',monospace;
+    font-style:normal;
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:0.1em;
+  }
+
+  /* Callout */
+  .callout{
+    background:var(--paper);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:28px 32px;
+    margin:32px 0;
+    position:relative;
+  }
+  .callout-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.2em;
+    color:var(--accent);
+    text-transform:uppercase;
+    margin-bottom:12px;
+    display:inline-block;
+    padding:4px 10px;
+    background:var(--accent-soft);
+    border-radius:3px;
+  }
+  .callout h5{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    font-weight:500;
+    margin-bottom:12px;
+    color:var(--ink);
+  }
+  .callout p:last-child{margin-bottom:0}
+
+  /* Code blocks */
+  pre{
+    background:var(--code-bg);
+    color:var(--code-ink);
+    padding:24px;
+    border-radius:6px;
+    overflow-x:auto;
+    margin:32px 0;
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    line-height:1.6;
+  }
+  pre .comment{color:#7a7165;font-style:italic}
+  pre .tag{color:#E89B5C}
+  pre .str{color:#9CCFA1}
+  pre .key{color:#D6B86F}
+  code{
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.88em;
+    background:var(--bg-warm);
+    padding:2px 6px;
+    border-radius:3px;
+    color:var(--accent);
+  }
+
+  /* Diagrams */
+  .diagram{
+    margin:48px -40px;
+    padding:48px 40px;
+    background:var(--paper);
+    border-top:1px solid var(--rule);
+    border-bottom:1px solid var(--rule);
+  }
+  .diagram-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.2em;
+    color:var(--accent);
+    text-transform:uppercase;
+    margin-bottom:8px;
+    text-align:center;
+  }
+  .diagram-title{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    text-align:center;
+    margin-bottom:32px;
+    color:var(--ink);
+    font-weight:500;
+  }
+  .diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  .diagram-caption{
+    text-align:center;
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--muted);
+    margin-top:24px;
+  }
+
+  /* Comparison table */
+  .compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+    margin:32px 0;
+  }
+  .compare-card{
+    padding:28px;
+    background:var(--paper);
+    border:1px solid var(--rule);
+    border-radius:6px;
+  }
+  .compare-card h6{
+    font-family:'Fraunces',serif;
+    font-size:20px;
+    margin-bottom:16px;
+    color:var(--accent);
+    font-weight:600;
+  }
+  .compare-card p{margin-bottom:0;font-size:15px;line-height:1.6}
+
+  /* Table */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:32px 0;
+    font-size:14px;
+  }
+  th{
+    text-align:left;
+    padding:12px;
+    background:var(--bg-warm);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--ink);
+    border-bottom:2px solid var(--accent);
+  }
+  td{
+    padding:14px 12px;
+    border-bottom:1px solid var(--rule);
+    color:var(--ink-soft);
+    vertical-align:top;
+  }
+
+  /* Steps */
+  .steps{counter-reset:step;margin:32px 0}
+  .step{
+    counter-increment:step;
+    display:grid;
+    grid-template-columns:60px 1fr;
+    gap:24px;
+    padding:24px 0;
+    border-top:1px solid var(--rule);
+  }
+  .step::before{
+    content:counter(step,decimal-leading-zero);
+    font-family:'Fraunces',serif;
+    font-size:42px;
+    color:var(--accent);
+    font-weight:300;
+    line-height:1;
+  }
+  .step:last-child{border-bottom:1px solid var(--rule)}
+  .step h6{
+    font-family:'Fraunces',serif;
+    font-size:22px;
+    margin-bottom:8px;
+    color:var(--ink);
+    font-weight:500;
+  }
+  .step p{font-size:15px;margin-bottom:0}
+
+  /* Pill row */
+  .pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:24px 0;
+  }
+  .pill{
+    padding:6px 14px;
+    background:var(--bg-warm);
+    border:1px solid var(--rule);
+    border-radius:100px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--ink);
+  }
+  .pill.accent{background:var(--accent);color:white;border-color:var(--accent)}
+
+  /* Footer */
+  footer{
+    background:var(--ink);
+    color:var(--bg);
+    padding:80px 40px;
+    text-align:center;
+  }
+  footer .foot-title{
+    font-family:'Fraunces',serif;
+    font-size:32px;
+    margin-bottom:16px;
+    font-style:italic;
+    font-weight:300;
+  }
+  footer p{
+    color:var(--rule);
+    max-width:600px;
+    margin:0 auto 12px;
+    font-size:15px;
+  }
+  footer a{color:var(--highlight);border-bottom-color:var(--highlight)}
+
+  @media(max-width:768px){
+    body{font-size:16px}
+    .hero{padding:40px 24px}
+    .hero-bottom{grid-template-columns:1fr;gap:24px}
+    main{padding:60px 24px}
+    .diagram{margin:32px -24px;padding:32px 24px}
+    blockquote{margin:32px 0;padding:24px}
+    .compare{grid-template-columns:1fr}
+    h2{font-size:36px}
+    .step{grid-template-columns:48px 1fr;gap:16px}
+    .step::before{font-size:32px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="hero-meta">
+    <div class="hero-meta-left">
+      <span><strong>Deep (Learning) Focus</strong></span>
+      <span>Cameron R. Wolfe, Ph.D. · Tháng 5, 2026</span>
+    </div>
+    <div>Bản dịch tiếng Việt</div>
+  </div>
+
+  <div class="hero-center">
+    <span class="hero-eyebrow">Cẩm nang chi tiết</span>
+    <h1>Đánh giá <em>AI Agent</em></h1>
+    <p class="hero-sub">Những thực hành tốt nhất và mô hình phổ biến để đánh giá hiệu quả các hệ thống AI Agent trong thực tế.</p>
+    <p class="hero-author">Tác giả · <span>Cameron R. Wolfe</span> · Staff Research Scientist tại Netflix</p>
+  </div>
+
+  <div class="hero-bottom">
+    <div class="hero-stat"><strong>~45 phút</strong>Thời gian đọc ước tính</div>
+    <div class="hero-stat"><strong>13 mục</strong>Cấu trúc bài viết</div>
+    <div class="hero-stat"><strong>3 case study</strong>τ-bench · Terminal-Bench · v.v.</div>
+  </div>
+</section>
+
+<!-- ========== TOC ========== -->
+<section class="toc">
+  <div class="toc-title">Mục lục</div>
+  <ol class="toc-list">
+    <li><a href="#intro">Mở đầu: Vì sao đánh giá agent lại khó?</a><span>Phần 1</span></li>
+    <li><a href="#fundamentals">Nền tảng về Hệ thống Agent</a><span>Phần 2</span></li>
+    <li><a href="#components">Các thành phần của một Agent</a><span>Phần 3</span></li>
+    <li><a href="#react">Vòng lặp Agent & Framework ReAct</a><span>Phần 4</span></li>
+    <li><a href="#multi-agent">Hệ thống Multi-Agent</a><span>Phần 5</span></li>
+    <li><a href="#context">Context Engineering</a><span>Phần 6</span></li>
+    <li><a href="#scaffold">Agent Scaffolds (Khung đỡ Agent)</a><span>Phần 7</span></li>
+    <li><a href="#eval-patterns">Các mô hình phổ biến trong đánh giá Agent</a><span>Phần 8</span></li>
+    <li><a href="#graders">Các loại bộ chấm điểm (Graders)</a><span>Phần 9</span></li>
+    <li><a href="#tau-bench">Case Study: Bộ benchmark τ-bench</a><span>Phần 10</span></li>
+    <li><a href="#terminal-bench">Case Study: Terminal-Bench</a><span>Phần 11</span></li>
+    <li><a href="#other-benchmarks">Các benchmark hữu ích khác</a><span>Phần 12</span></li>
+    <li><a href="#roadmap">Lộ trình xây dựng đánh giá Agent của bạn</a><span>Phần 13</span></li>
+  </ol>
+</section>
+
+<!-- ========== MAIN ========== -->
+<main>
+
+<!-- ===== INTRO ===== -->
+<article class="section" id="intro">
+  <span class="section-num">Phần 01 · Mở đầu</span>
+  <h2>Vì sao đánh giá <em>agent</em> lại khó đến vậy?</h2>
+
+  <p class="lede"><strong>Đánh giá (evaluation)</strong> là một trong những lĩnh vực nghiên cứu quan trọng nhất đối với các mô hình ngôn ngữ lớn (LLM). Gần đây, cách chúng ta sử dụng và đánh giá LLM đã thay đổi mạnh mẽ. Trước đây, ta đánh giá LLM bằng các benchmark gồm câu hỏi tĩnh hoặc đoạn hội thoại ngắn. Còn bây giờ, ta có những hệ thống agent vận hành trong khoảng thời gian dài và liên tục tương tác với môi trường xung quanh.</p>
+
+  <p>Agent rất khó đánh giá đúng cách vì chúng <strong>vừa phức tạp, vừa có tính tự chủ cao</strong>. Để đo lường chính xác năng lực của một hệ thống agent, chúng ta phải xây dựng những "khung kiểm thử" (harnesses) thật sự sát với thực tế — nơi agent được kiểm tra giống hệt như khi nó được dùng ngoài đời. Việc xây dựng năng lực đánh giá này ngày càng quan trọng khi agent đang được áp dụng rộng rãi vào các lĩnh vực rủi ro cao như lập trình hay y khoa.</p>
+
+  <div class="callout">
+    <span class="callout-label">Bạn sẽ học được gì?</span>
+    <h5>Lộ trình xuyên suốt bài viết</h5>
+    <p>Bài viết này sẽ đi từ <strong>khái niệm cơ bản về agent</strong>, sau đó xây dựng một <strong>khung làm việc rõ ràng cho quy trình đánh giá agent</strong>, và kết thúc bằng các <strong>case study</strong> về những benchmark agent mới nhất — cùng với một <strong>lộ trình thực hành</strong> để bạn tự xây dựng đánh giá agent cho riêng mình.</p>
+  </div>
+
+  <p>Mặc dù tốn thời gian và khó khăn, học cách đánh giá agent đúng cách có giá trị cực kỳ lớn. Khi đo lường hiệu năng một cách nghiêm túc thay vì dựa vào cảm tính, ta có thể cải thiện năng lực agent một cách <em>rất nhanh</em>.</p>
+</article>
+
+<!-- ===== FUNDAMENTALS ===== -->
+<article class="section" id="fundamentals">
+  <span class="section-num">Phần 02 · Nền tảng</span>
+  <h2>Agent thực ra <em>là gì?</em></h2>
+
+  <blockquote>
+    "LLM đang ngày càng giỏi xử lý những tác vụ phức tạp, nhiều bước. Những bước tiến trong khả năng suy luận, đa phương thức và sử dụng công cụ đã mở ra một thể loại hệ thống mới mang tên: <em>agent</em>."
+    <cite>— OpenAI [3]</cite>
+  </blockquote>
+
+  <p>Vào những ngày đầu của kỷ nguyên agent, ranh giới giữa "agent" và một LLM thông thường khá mờ. Dù sao thì LLM cũng nằm ở trung tâm của mọi hệ thống agent mà. Qua thời gian, những đặc điểm chính của agent dần lộ ra:</p>
+
+  <div class="pills">
+    <span class="pill">Suy luận (Reasoning)</span>
+    <span class="pill">Gọi công cụ (Tool calling)</span>
+    <span class="pill">Giải bài toán nhiều bước</span>
+    <span class="pill">Tự khôi phục khi gặp lỗi</span>
+    <span class="pill">Hành động thay người dùng</span>
+  </div>
+
+  <p>LLM có thể suy luận, gọi tool và giải quyết vấn đề — nhưng <strong>điểm phân biệt của agent là khả năng kết hợp tất cả các thành phần này trong một "vòng lặp agent" (agentic loop)</strong> để giải quyết các bài toán khó. Thực ra, <em>định nghĩa đơn giản nhất về một agent</em> là: một LLM tự sử dụng tool trong một vòng lặp.</p>
+
+  <p>Khác với LLM thông thường, agent phải <strong>đánh giá các kết quả trung gian và tự khôi phục từ chính lỗi của mình</strong> để vận hành hiệu quả trong vòng lặp này.</p>
+
+  <!-- DIAGRAM: Agentic Loop -->
+  <div class="diagram">
+    <div class="diagram-label">Hình 01</div>
+    <div class="diagram-title">Vòng lặp Agent (Agentic Loop)</div>
+    <svg viewBox="0 0 700 380" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#B8431C"/>
+        </marker>
+      </defs>
+      <!-- Center: LLM -->
+      <circle cx="350" cy="190" r="70" fill="#1A1814" stroke="#B8431C" stroke-width="2"/>
+      <text x="350" y="185" text-anchor="middle" fill="#F5F1E8" font-family="Fraunces" font-size="18" font-weight="500">LLM</text>
+      <text x="350" y="205" text-anchor="middle" fill="#E8C4AC" font-family="JetBrains Mono" font-size="11">bộ não agent</text>
+
+      <!-- 4 nodes around -->
+      <!-- Top: Reasoning -->
+      <rect x="270" y="20" width="160" height="60" rx="6" fill="#FBF8F1" stroke="#D9D1BF" stroke-width="1.5"/>
+      <text x="350" y="45" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="14" font-weight="600">Suy luận</text>
+      <text x="350" y="64" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11">Lập kế hoạch &amp; phản tư</text>
+
+      <!-- Right: Tool calls -->
+      <rect x="510" y="160" width="160" height="60" rx="6" fill="#FBF8F1" stroke="#D9D1BF" stroke-width="1.5"/>
+      <text x="590" y="185" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="14" font-weight="600">Gọi công cụ</text>
+      <text x="590" y="204" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11">API, MCP, CLI...</text>
+
+      <!-- Bottom: Observation -->
+      <rect x="270" y="300" width="160" height="60" rx="6" fill="#FBF8F1" stroke="#D9D1BF" stroke-width="1.5"/>
+      <text x="350" y="325" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="14" font-weight="600">Quan sát</text>
+      <text x="350" y="344" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11">Đọc kết quả từ môi trường</text>
+
+      <!-- Left: Action -->
+      <rect x="30" y="160" width="160" height="60" rx="6" fill="#FBF8F1" stroke="#D9D1BF" stroke-width="1.5"/>
+      <text x="110" y="185" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="14" font-weight="600">Hành động</text>
+      <text x="110" y="204" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11">Thay đổi môi trường</text>
+
+      <!-- Arrows: circular -->
+      <path d="M 350,80 Q 480,100 480,160" fill="none" stroke="#B8431C" stroke-width="2" marker-end="url(#arr1)"/>
+      <path d="M 510,220 Q 480,290 430,300" fill="none" stroke="#B8431C" stroke-width="2" marker-end="url(#arr1)"/>
+      <path d="M 270,320 Q 150,290 190,220" fill="none" stroke="#B8431C" stroke-width="2" marker-end="url(#arr1)"/>
+      <path d="M 110,160 Q 110,100 270,80" fill="none" stroke="#B8431C" stroke-width="2" marker-end="url(#arr1)"/>
+    </svg>
+    <p class="diagram-caption">Agent lặp đi lặp lại: suy luận → hành động → quan sát → lại suy luận, cho đến khi giải xong bài toán.</p>
+  </div>
+
+  <p>Vì agent suy luận trong khoảng thời gian dài và sử dụng tool, chúng còn được phân biệt qua <strong>mức độ tự chủ (autonomy)</strong>. LLM truyền thống thường được dùng cho các tác vụ hẹp, rõ ràng (phân loại, trả lời câu hỏi) — mô hình tạo ra output nhưng không tự tiếp tục hành động hay sửa đổi môi trường. Ngược lại, agent thường được phép <em>tự kiểm soát quy trình của chính mình</em> trong một khoảng thời gian, và có thể dùng tool để tự hành động (ví dụ: sửa lịch, đặt vé máy bay).</p>
+</article>
+
+<!-- ===== COMPONENTS ===== -->
+<article class="section" id="components">
+  <span class="section-num">Phần 03 · Cấu trúc</span>
+  <h2>Ba thành phần tạo nên <em>một agent</em></h2>
+
+  <p>Giao diện input-output của một LLM thật ra rất đơn giản: <em>bạn đưa vào prompt, bạn nhận lại output</em>. Sự đơn giản đó đóng vai trò lớn trong việc đại chúng đón nhận AI — LLM vừa hữu ích, vừa trực quan. Cũng giao diện text-to-text này có thể được mở rộng để xử lý nhiều hành vi bổ trợ như suy luận và dùng công cụ, làm cho khoảng cách giữa LLM thường và agent khá nhỏ.</p>
+
+  <p>Cụ thể, một hệ thống agent thường gồm <strong>ba thành phần</strong>:</p>
+
+  <div class="diagram">
+    <div class="diagram-label">Hình 02</div>
+    <div class="diagram-title">Ba thành phần cốt lõi của Agent</div>
+    <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+      <!-- 3 columns -->
+      <g>
+        <rect x="40" y="40" width="180" height="200" rx="8" fill="#1A1814" stroke="#B8431C" stroke-width="2"/>
+        <circle cx="130" cy="90" r="22" fill="none" stroke="#E8C4AC" stroke-width="2"/>
+        <text x="130" y="96" text-anchor="middle" fill="#E8C4AC" font-family="Fraunces" font-size="20" font-weight="500">01</text>
+        <text x="130" y="140" text-anchor="middle" fill="#F5F1E8" font-family="Fraunces" font-size="20" font-weight="500">LLM</text>
+        <text x="130" y="160" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="11">(hoặc mô hình suy luận)</text>
+        <text x="130" y="195" text-anchor="middle" fill="#F5F1E8" font-family="Be Vietnam Pro" font-size="12">Bộ não — quyết định</text>
+        <text x="130" y="212" text-anchor="middle" fill="#F5F1E8" font-family="Be Vietnam Pro" font-size="12">các bước cần làm</text>
+      </g>
+      <g>
+        <rect x="260" y="40" width="180" height="200" rx="8" fill="#FBF8F1" stroke="#B8431C" stroke-width="2"/>
+        <circle cx="350" cy="90" r="22" fill="none" stroke="#B8431C" stroke-width="2"/>
+        <text x="350" y="96" text-anchor="middle" fill="#B8431C" font-family="Fraunces" font-size="20" font-weight="500">02</text>
+        <text x="350" y="140" text-anchor="middle" fill="#1A1814" font-family="Fraunces" font-size="20" font-weight="500">Tools</text>
+        <text x="350" y="160" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11">(công cụ)</text>
+        <text x="350" y="195" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="12">Cánh tay — tương tác</text>
+        <text x="350" y="212" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="12">với môi trường bên ngoài</text>
+      </g>
+      <g>
+        <rect x="480" y="40" width="180" height="200" rx="8" fill="#F2D896" stroke="#B8431C" stroke-width="2"/>
+        <circle cx="570" cy="90" r="22" fill="none" stroke="#B8431C" stroke-width="2"/>
+        <text x="570" y="96" text-anchor="middle" fill="#B8431C" font-family="Fraunces" font-size="20" font-weight="500">03</text>
+        <text x="570" y="140" text-anchor="middle" fill="#1A1814" font-family="Fraunces" font-size="20" font-weight="500">Instructions</text>
+        <text x="570" y="160" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11">(hướng dẫn)</text>
+        <text x="570" y="195" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="12">La bàn — quy định</text>
+        <text x="570" y="212" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="12">hành vi mong đợi</text>
+      </g>
+    </svg>
+  </div>
+
+  <p>LLM đóng vai trò <strong>"bộ não"</strong> của hệ thống — phán xét tiến độ tiến tới lời giải cuối cùng và quyết định các bước cần làm. Tuy nhiên, để đến được lời giải đúng, ta thường cần nhiều hơn chỉ LLM. Ta phải <em>chỉ định rõ ràng hành vi mong đợi của agent</em> và cho phép mô hình gọi tool hoặc suy luận sâu khi cần thiết.</p>
+
+  <h3>3.1 — Sử dụng công cụ (Tool Use)</h3>
+
+  <p>Để tương tác với môi trường bên ngoài, LLM cần dùng được các tool như API, CLI, hay <a href="https://modelcontextprotocol.io/">MCP server</a>. Ví dụ, nếu bạn muốn agent đặt bàn ở nhà hàng địa phương, bạn chỉ cần dạy mô hình cách gọi API của OpenTable.</p>
+
+  <p>Tool call được xử lý ngay trong dòng token của LLM bằng cách tạo các <strong>token đặc biệt</strong> liên quan đến tool call và dạy LLM cách dùng chúng. Ví dụ, mô hình Qwen3 dùng các thẻ XML như sau (được lưu thành token đặc biệt trong tokenizer):</p>
+
+  <div class="callout">
+    <span class="callout-label">Cấu trúc thẻ tool call của Qwen3</span>
+    <p><code>&lt;tool&gt;...&lt;/tool&gt;</code> — Bao quanh định nghĩa của tool.</p>
+    <p><code>&lt;tool_call&gt;...&lt;/tool_call&gt;</code> — Bao quanh một lệnh gọi tool cụ thể (gồm tool name và tham số).</p>
+    <p><code>&lt;tool_response&gt;...&lt;/tool_response&gt;</code> — Bao quanh kết quả trả về từ tool.</p>
+  </div>
+
+  <p>Khi suy luận, ta <strong>ngắt quá trình sinh token</strong> mỗi khi thấy <code>&lt;/tool_call&gt;</code>. Sau đó parse yêu cầu, gọi tool, ghép kết quả vào output hiện tại, và tiếp tục sinh. Mô hình lúc này đã có sẵn kết quả tool call trong context để sinh phần còn lại.</p>
+
+  <pre><span class="comment"># Ví dụ template instruction cho Qwen3</span>
+&lt;|im_start|&gt;system
+# Tools
+
+You may call one or more functions to assist with the user query.
+
+You are provided with function signatures within &lt;tools&gt;&lt;/tools&gt; XML tags:
+&lt;tools&gt;
+{
+  <span class="key">"type"</span>: <span class="str">"function"</span>,
+  <span class="key">"function"</span>: {
+    <span class="key">"name"</span>: <span class="str">"search_web"</span>,
+    <span class="key">"description"</span>: <span class="str">"Search the web for information."</span>,
+    <span class="key">"parameters"</span>: { ... }
+  }
+}
+&lt;/tools&gt;
+&lt;|im_end|&gt;
+&lt;|im_start|&gt;user
+Who was the first president of the United States?&lt;|im_end|&gt;
+&lt;|im_start|&gt;assistant
+&lt;tool_call&gt;
+{<span class="key">"name"</span>: <span class="str">"search_web"</span>, <span class="key">"arguments"</span>: {<span class="key">"query"</span>: <span class="str">"first president of the United States"</span>}}
+&lt;/tool_call&gt;&lt;|im_end|&gt;</pre>
+
+  <p><strong>Thiết kế tool tốt là một nghệ thuật.</strong> Tool phải có tài liệu rõ ràng, mục đích cụ thể, ít trùng lặp với tool khác, và có khả năng khôi phục từ lỗi một cách "đẹp đẽ". Cách dễ nhất để biết tool có được thiết kế đúng không là: <em>"Một engineer thực thụ có thể dùng được tool này chỉ qua tài liệu không?"</em></p>
+
+  <h4>Các chỉ số đo lường khả năng dùng tool</h4>
+  <table>
+    <tr><th>Chỉ số</th><th>Đo lường điều gì</th></tr>
+    <tr><td><strong>Invocation accuracy</strong></td><td>Có quyết định đúng việc <em>nên gọi</em> tool hay không? (Tránh gọi tool khi đáng lẽ trả lời trực tiếp)</td></tr>
+    <tr><td><strong>Selection accuracy</strong></td><td>Có gọi <em>đúng</em> tool không? (So với ground truth trajectory)</td></tr>
+    <tr><td><strong>Structural accuracy</strong></td><td>Cấu trúc lệnh gọi có hợp lệ không? Không thiếu/sai tham số.</td></tr>
+    <tr><td><strong>Trajectory accuracy</strong></td><td>Cả chuỗi tool call có đúng thứ tự, không thừa, không thiếu không?</td></tr>
+  </table>
+
+  <h3>3.2 — Suy luận (Reasoning)</h3>
+
+  <p>Khả năng suy luận đóng vai trò then chốt trong việc xây dựng agent hiệu quả. Để giải bài toán nhiều bước, agent phải:</p>
+  <ul>
+    <li>Phân rã bài toán khó thành các phần nhỏ, đơn giản hơn</li>
+    <li>Giải từng phần (có thể nhờ tool) để đi đến lời giải cuối</li>
+    <li>Tự phản tư và <strong>khôi phục từ chính lỗi của mình</strong></li>
+  </ul>
+
+  <p>Xử lý bài toán dài hạn theo cách này đòi hỏi mức độ suy luận và độ tin cậy mà <em>chỉ gần đây mới khả thi</em> với sự ra đời của các mô hình suy luận (reasoning models).</p>
+
+  <div class="callout">
+    <span class="callout-label">Reasoning model khác gì LLM thường?</span>
+    <p>Khác với LLM tiêu chuẩn (trả lời ngay khi nhận prompt), <strong>reasoning model viết ra một chuỗi suy nghĩ dài</strong> (thường ẩn) trước khi đưa ra câu trả lời. Quá trình "suy nghĩ" này tuân theo <em>quy luật scaling lúc inference</em>: chuỗi suy luận càng dài thì tốn compute hơn nhưng thường cho ra kết quả tốt hơn — <strong>cho phép giải các bài khó hơn bằng cách "suy nghĩ" nhiều hơn</strong>.</p>
+  </div>
+
+  <h3>3.3 — Hướng dẫn (Instructions)</h3>
+
+  <p>Thành phần cuối cùng của agent là hướng dẫn. Phần lõi của hướng dẫn có thể lấy từ tài liệu sẵn có trong lĩnh vực (như guideline gán nhãn, tài liệu chính sách). Hướng dẫn cần:</p>
+  <ul>
+    <li><strong>Càng rõ ràng càng tốt</strong></li>
+    <li>Làm rõ các trường hợp ngoại lệ qua quy tắc cụ thể hoặc ví dụ</li>
+    <li>Chỉ rõ <em>hành động chính xác</em> mà agent cần làm</li>
+    <li>Cân bằng giữa <strong>đơn giản</strong> và <strong>chi tiết</strong></li>
+  </ul>
+
+  <p>Ta muốn hướng dẫn đủ chi tiết để dẫn dắt hành vi agent đáng tin cậy, nhưng prompt quá phức tạp sẽ trở nên giòn (brittle) và khó bảo trì.</p>
+
+  <blockquote>
+    "Agent có xu hướng cố làm quá nhiều cùng lúc — về cơ bản là cố one-shot cả app... điều này khiến mô hình hết context giữa chừng... agent sau đó phải đoán xem chuyện gì đã xảy ra, và mất rất nhiều thời gian cố làm lại app cơ bản."
+    <cite>— Anthropic [4]</cite>
+  </blockquote>
+
+  <p>Hướng dẫn cho agent nên giải thích <strong>không chỉ vấn đề cần giải</strong> mà còn cả <strong>chiến lược tốt nhất để giải nó</strong>. Ví dụ: chia bài toán thành phần nhỏ, đảm bảo mỗi bước được triển khai như một tính năng hoạt động đầy đủ, viết ghi chú để các agent sau tham chiếu, hoặc duy trì một to-do list toàn cục.</p>
+</article>
+
+<!-- ===== REACT ===== -->
+<article class="section" id="react">
+  <span class="section-num">Phần 04 · Framework</span>
+  <h2>Vòng lặp Agent & <em>ReAct</em></h2>
+
+  <p>Một hệ thống agent đầy đủ kết hợp tất cả các thành phần trên trong một vòng while — đây chính là <strong>agentic loop</strong>. Trong vòng lặp này, agent sẽ suy luận, gọi tool, và hành động dựa trên hướng dẫn, cho đến khi đạt được trạng thái cuối theo điều kiện thoát. Lúc đó, agent giao quyền điều khiển lại — cho người dùng hoặc một agent khác. Toàn bộ quá trình này được coi là <em>một "run"</em> của vòng lặp.</p>
+
+  <p>Ý tưởng vòng lặp đơn giản, nhưng có nhiều biến thể. Một trong những biến thể sớm nhất là framework <strong>ReAct</strong> — viết tắt của <strong>RE</strong>asoning + <strong>ACT</strong>ion.</p>
+
+  <div class="diagram">
+    <div class="diagram-label">Hình 03</div>
+    <div class="diagram-title">Framework ReAct: Suy luận đan xen Hành động</div>
+    <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#1A1814"/>
+        </marker>
+      </defs>
+      <!-- Step boxes -->
+      <g transform="translate(20,40)">
+        <rect width="200" height="80" rx="6" fill="#F2D896" stroke="#1A1814" stroke-width="1.5"/>
+        <text x="100" y="28" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">THOUGHT 1</text>
+        <text x="100" y="50" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="12">Tôi cần tìm "Milhouse"</text>
+        <text x="100" y="68" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="12">được đặt tên theo ai</text>
+      </g>
+      <g transform="translate(260,40)">
+        <rect width="200" height="80" rx="6" fill="#FBF8F1" stroke="#1A1814" stroke-width="1.5"/>
+        <text x="100" y="28" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">ACTION 1</text>
+        <text x="100" y="50" text-anchor="middle" fill="#1A1814" font-family="JetBrains Mono" font-size="12">Search[Milhouse]</text>
+      </g>
+      <g transform="translate(500,40)">
+        <rect width="180" height="80" rx="6" fill="#EFE9DB" stroke="#1A1814" stroke-width="1.5"/>
+        <text x="90" y="28" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">OBS 1</text>
+        <text x="90" y="50" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="11">Trang Wiki không nói</text>
+        <text x="90" y="66" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="11">tên đặt theo ai</text>
+      </g>
+
+      <g transform="translate(20,160)">
+        <rect width="200" height="80" rx="6" fill="#F2D896" stroke="#1A1814" stroke-width="1.5"/>
+        <text x="100" y="28" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">THOUGHT 2</text>
+        <text x="100" y="50" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="12">Có lẽ tôi nên</text>
+        <text x="100" y="68" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="12">tra "named after"</text>
+      </g>
+      <g transform="translate(260,160)">
+        <rect width="200" height="80" rx="6" fill="#FBF8F1" stroke="#1A1814" stroke-width="1.5"/>
+        <text x="100" y="28" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">ACTION 2</text>
+        <text x="100" y="50" text-anchor="middle" fill="#1A1814" font-family="JetBrains Mono" font-size="12">Lookup[named after]</text>
+      </g>
+      <g transform="translate(500,160)">
+        <rect width="180" height="80" rx="6" fill="#EFE9DB" stroke="#1A1814" stroke-width="1.5"/>
+        <text x="90" y="28" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">OBS 2</text>
+        <text x="90" y="50" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="11">Đặt theo TT</text>
+        <text x="90" y="66" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="11">Richard Nixon</text>
+      </g>
+
+      <g transform="translate(140,275)">
+        <rect width="420" height="40" rx="6" fill="#B8431C"/>
+        <text x="210" y="26" text-anchor="middle" fill="#FBF8F1" font-family="Be Vietnam Pro" font-size="13" font-weight="600">ACTION 3: Finish[Richard Nixon]</text>
+      </g>
+
+      <!-- Arrows -->
+      <path d="M 220,80 L 256,80" stroke="#1A1814" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M 460,80 L 496,80" stroke="#1A1814" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M 590,120 Q 590,140 120,140 L 120,156" stroke="#1A1814" stroke-width="1.5" marker-end="url(#arr2)" fill="none"/>
+      <path d="M 220,200 L 256,200" stroke="#1A1814" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M 460,200 L 496,200" stroke="#1A1814" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M 590,240 Q 590,260 350,260 L 350,275" stroke="#1A1814" stroke-width="1.5" marker-end="url(#arr2)" fill="none"/>
+    </svg>
+    <p class="diagram-caption">Ví dụ: Agent giải câu hỏi "Nhân vật Milhouse trong The Simpsons được Matt Groening đặt tên theo ai?"</p>
+  </div>
+
+  <p>Điểm <strong>mới mẻ chính của ReAct</strong> là nó nhấn mạnh cả <em>suy nghĩ và hành động</em>. Vòng lặp agent được cấu trúc sao cho mô hình phải <strong>suy luận rõ ràng qua từng hành động</strong> và xem xét toàn bộ context (gồm các quan sát từ tool call và các suy nghĩ trước đó) khi quyết định hành động kế tiếp. Nói đơn giản: <em>suy luận và hành động có quan hệ cộng sinh</em>.</p>
+</article>
+
+<!-- ===== MULTI-AGENT ===== -->
+<article class="section" id="multi-agent">
+  <span class="section-num">Phần 05 · Quy mô</span>
+  <h2>Hệ thống <em>Multi-Agent</em></h2>
+
+  <p>Hệ thống một-agent rất đơn giản và cực kỳ mạnh khi được trang bị các tool cần thiết. Vì độ phức tạp khi điều phối nhiều agent, <strong>hầu như ta luôn nên bắt đầu với thiết kế một-agent</strong> và tối ưu hết mức có thể trước — <em>agent đơn lẻ dễ đánh giá và bảo trì hơn nhiều</em>.</p>
+
+  <h4>Khi nào cần nhiều agent?</h4>
+  <p>Multi-agent giúp tách logic các thành phần của bài toán khó, nhưng cũng phức tạp hơn. Các dấu hiệu cho thấy bạn có thể cần nhiều agent:</p>
+  <ul>
+    <li>Hướng dẫn cho hệ thống một-agent <strong>quá cồng kềnh</strong>, và agent đang chật vật theo dõi instruction kể cả khi đã có logic/template rõ ràng.</li>
+    <li>Tool đang bị chọn sai vì <strong>có quá nhiều tool có sẵn</strong>.</li>
+  </ul>
+
+  <p>Khả năng suy luận của LLM hiện đại đã cho phép chọn đúng tool ngay cả từ tập lớn. Vấn đề chỉ xảy ra khi các tool có <em>mục đích chồng chéo</em>, khiến việc chọn lựa trở nên chủ quan. Nếu không giải quyết được bằng cách viết spec tool rõ hơn, hãy chia tool sang các agent khác nhau.</p>
+
+  <h3>5.1 — Hai mô hình multi-agent phổ biến</h3>
+
+  <div class="compare">
+    <div class="compare-card">
+      <h6>Mô hình Manager</h6>
+      <p>Một agent "quản lý" trung tâm điều phối các agent chuyên môn qua tool call. Mỗi agent xử lý một nhiệm vụ/lĩnh vực cụ thể. Manager phát triển chiến lược giải, ủy quyền cho agent chuyên, và tổng hợp kết quả.</p>
+    </div>
+    <div class="compare-card">
+      <h6>Mô hình Phi tập trung</h6>
+      <p>Nhiều agent hoạt động <em>ngang hàng</em>, chuyển nhiệm vụ cho nhau dựa trên chuyên môn. Không có agent trung tâm. Hoạt động tốt khi không cần một agent tổng hợp kết quả hay tương tác trực tiếp với user.</p>
+    </div>
+  </div>
+
+  <!-- DIAGRAM: Manager vs Decentralized -->
+  <div class="diagram">
+    <div class="diagram-label">Hình 04</div>
+    <div class="diagram-title">Manager vs Phi tập trung</div>
+    <svg viewBox="0 0 700 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#3A3530"/>
+        </marker>
+      </defs>
+
+      <!-- Left: Manager -->
+      <text x="160" y="25" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="11" font-weight="600">MANAGER SETUP</text>
+      <circle cx="160" cy="80" r="32" fill="#1A1814" stroke="#B8431C" stroke-width="2"/>
+      <text x="160" y="78" text-anchor="middle" fill="#F5F1E8" font-family="Be Vietnam Pro" font-size="10" font-weight="600">Manager</text>
+      <text x="160" y="92" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="9">agent</text>
+      
+      <circle cx="60" cy="200" r="26" fill="#FBF8F1" stroke="#3A3530" stroke-width="1.5"/>
+      <text x="60" y="200" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="9">Translate</text>
+      <text x="60" y="212" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="9">EN→VI</text>
+      
+      <circle cx="160" cy="200" r="26" fill="#FBF8F1" stroke="#3A3530" stroke-width="1.5"/>
+      <text x="160" y="200" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="9">Translate</text>
+      <text x="160" y="212" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="9">EN→JA</text>
+      
+      <circle cx="260" cy="200" r="26" fill="#FBF8F1" stroke="#3A3530" stroke-width="1.5"/>
+      <text x="260" y="200" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="9">Translate</text>
+      <text x="260" y="212" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="9">EN→ZH</text>
+
+      <line x1="140" y1="108" x2="70" y2="174" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="160" y1="112" x2="160" y2="174" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="180" y1="108" x2="250" y2="174" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr3)"/>
+
+      <text x="160" y="255" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11" font-style="italic">Manager phân công cho các chuyên gia</text>
+
+      <!-- Divider -->
+      <line x1="350" y1="20" x2="350" y2="260" stroke="#D9D1BF" stroke-width="1" stroke-dasharray="4 4"/>
+
+      <!-- Right: Decentralized -->
+      <text x="530" y="25" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="11" font-weight="600">DECENTRALIZED SETUP</text>
+      
+      <circle cx="430" cy="100" r="28" fill="#FBF8F1" stroke="#B8431C" stroke-width="2"/>
+      <text x="430" y="100" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="10">Triage</text>
+      <text x="430" y="113" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="9">agent</text>
+      
+      <circle cx="560" cy="80" r="28" fill="#FBF8F1" stroke="#B8431C" stroke-width="2"/>
+      <text x="560" y="80" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="10">Sales</text>
+      <text x="560" y="93" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="9">agent</text>
+      
+      <circle cx="640" cy="160" r="28" fill="#FBF8F1" stroke="#B8431C" stroke-width="2"/>
+      <text x="640" y="160" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="10">Refund</text>
+      <text x="640" y="173" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="9">agent</text>
+      
+      <circle cx="500" cy="200" r="28" fill="#FBF8F1" stroke="#B8431C" stroke-width="2"/>
+      <text x="500" y="200" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="10">Support</text>
+      <text x="500" y="213" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="9">agent</text>
+
+      <line x1="455" y1="90" x2="532" y2="82" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="455" y1="113" x2="615" y2="155" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="445" y1="125" x2="490" y2="173" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr3)"/>
+      
+      <text x="530" y="255" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11" font-style="italic">Các agent chuyển tay nhau ngang hàng</text>
+    </svg>
+  </div>
+
+  <p>Một khái niệm liên quan đến mô hình Manager là <strong>sub-agent</strong>: thay vì giữ toàn bộ state trong một agent, ta kích hoạt sub-agent để xử lý các thành phần. Main agent điều phối kế hoạch cao cấp và tương tác với user, còn sub-agent thực hiện các task kỹ thuật cụ thể (như khám phá code, retrieve thông tin) và trả lại context cho main agent. Cách này giúp <em>tránh làm context của main agent bị quá tải</em>.</p>
+</article>
+
+<!-- ===== CONTEXT ENGINEERING ===== -->
+<article class="section" id="context">
+  <span class="section-num">Phần 06 · Quản lý ngữ cảnh</span>
+  <h2><em>Context Engineering</em></h2>
+
+  <p>Khi làm việc với LLM thông thường, prompt engineering luôn là yếu tố then chốt. Nhưng với agent thì quy trình hơi khác. Agent có khả năng thực hiện nhiều hành động — viết file, gọi API qua tool call — tạo ra một <strong>phạm vi rộng các nguồn dữ liệu</strong> có thể xuất hiện trong context window của LLM.</p>
+
+  <p>Những nguồn này <em>mở rộng theo thời gian</em> vì agent chạy trong vòng lặp. Mặc dù LLM hiện đại nhanh và hỗ trợ context dài (hàng triệu token), nhưng <strong>"context rot" (mục ruỗng context) là vấn đề phổ biến</strong>. Khi số token trong context tăng, mô hình kém chính xác hơn khi nhớ thông tin.</p>
+
+  <blockquote>
+    "Chúng tôi xem context engineering là sự tiến hóa tự nhiên của prompt engineering. Prompt engineering nói về cách viết và tổ chức instruction cho LLM để có kết quả tối ưu. Context engineering nói về <em>chiến lược chăm sóc và duy trì tập token tối ưu trong suốt quá trình inference</em>, bao gồm tất cả thông tin có thể đến đó ngoài prompt."
+    <cite>— Anthropic [2]</cite>
+  </blockquote>
+
+  <h3>6.1 — Context động (Dynamic Context)</h3>
+
+  <p>Với LLM thông thường, ta thường nạp context tĩnh. Ví dụ kỹ thuật <strong>RAG (Retrieval-Augmented Generation)</strong> rất phổ biến — retrieve các đoạn thông tin rồi ghép vào context window. Tuy hiệu quả, RAG là cách tiếp cận tĩnh: mô hình retrieve <em>toàn bộ</em> thông tin cần thiết trước khi bắt đầu trả lời.</p>
+
+  <p>Agent thì dùng cách <strong>linh hoạt hơn dựa trên "progressive disclosure"</strong> (tiết lộ dần dần). Thay vì pre-load mọi thứ, agent khám phá và <em>tự quyết định khi nào cần thêm context mới</em>.</p>
+
+  <p>Để tránh context rot, các tool retrieval phải được thiết kế <strong>tiết kiệm token</strong>. Ví dụ khi đọc file, agent có thể đọc số dòng cụ thể hoặc xem trước phần đầu file thay vì luôn nạp cả file vào context.</p>
+
+  <h3>6.2 — Compaction (Nén context)</h3>
+
+  <p>Khác với LLM thông thường, agent chạy nhiều lượt để giải bài toán dài. Qua nhiều lượt, agent sẽ suy luận, gọi tool, tự phản tư, và context phình ra nhanh chóng. Ta cần kỹ thuật quản lý hiệu quả vì LLM có context window hữu hạn.</p>
+
+  <p><strong>Compaction</strong> là loại kỹ thuật phổ biến nhất, có nhiều dạng:</p>
+
+  <div class="compare">
+    <div class="compare-card">
+      <h6>Summarization (Tóm tắt)</h6>
+      <p>Tạo bản tóm tắt cuộc hội thoại dài với LLM và khởi tạo lại context window mới với bản tóm tắt ngắn hơn này.</p>
+    </div>
+    <div class="compare-card">
+      <h6>Tool Result Clearing (Xóa kết quả tool)</h6>
+      <p>Xóa payload output của các tool call cũ trong lịch sử hội thoại của agent.</p>
+    </div>
+  </div>
+  <div class="compare">
+    <div class="compare-card">
+      <h6>Note-taking (Ghi chú)</h6>
+      <p>Viết ghi chú ra một kho lưu trữ ngoài (như file markdown) mà agent có thể truy cập sau khi cần. Có thể dùng độc lập, không cần compaction.</p>
+    </div>
+    <div class="compare-card">
+      <h6>Mỗi kỹ thuật có lợi-hại riêng</h6>
+      <p>Tóm tắt: giữ dòng chảy hội thoại nhưng có thể mất info quan trọng. Xóa tool: an toàn hơn nhưng không đảm bảo không tràn context. Note: linh hoạt nhưng agent đôi khi gặp khó khi tận dụng kho note bên ngoài.</p>
+    </div>
+  </div>
+
+  <p>Ý tưởng cốt lõi của context engineering rất đơn giản: <strong>loại bỏ context không liên quan và giữ lại context sẽ cần trong tương lai</strong>. Đáng tiếc, <em>dự đoán tính hữu ích trong tương lai của thông tin</em> là việc rất khó và phụ thuộc vào từng task. Để tìm cách tốt nhất, ta phải xây dựng benchmark mạnh để đo lường các khả năng này một cách thực tế.</p>
+</article>
+
+<!-- ===== SCAFFOLD ===== -->
+<article class="section" id="scaffold">
+  <span class="section-num">Phần 07 · Khung đỡ</span>
+  <h2><em>Agent Scaffold</em> — Khung đỡ Agent</h2>
+
+  <p>Khi đã hiểu cấu trúc agent, ta thấy hệ thống agent xây dựng trực tiếp lên giao diện LLM tiêu chuẩn. Ta chỉ mở rộng khả năng của LLM để hỗ trợ suy luận và giải vấn đề tốt hơn với tool ngoài. Tuy nhiên, khi khả năng agent cải thiện theo thời gian, thiết kế của hệ thống <em>bao quanh</em> agent — tool, instructions, environment, chiến lược giải — cũng trở nên tinh vi hơn. Tập hợp các thành phần và framework dùng để chạy một agent được gọi là <strong>agent scaffold</strong>.</p>
+
+  <blockquote>
+    "Agent harness (hay scaffold) là hệ thống cho phép mô hình hành động như một agent: xử lý input, điều phối tool call, và trả về kết quả. Khi đánh giá agent, <em>chúng ta đang đánh giá harness và mô hình cùng hoạt động</em>."
+    <cite>— Anthropic [1]</cite>
+  </blockquote>
+
+  <p>ReAct là một ví dụ của scaffold cơ bản, nhưng nhiều chi tiết thiết kế khác có thể xem xét. Các scaffold khác nhau có thể thay đổi:</p>
+
+  <ul>
+    <li><strong>Giao diện với môi trường</strong>: Một số terminal agent có tool chuyên biệt, một số khác (như <em>Terminus agent</em>) gõ keystroke trực tiếp vào terminal — giống con người.</li>
+    <li><strong>Chiến lược prompting</strong>: Scaffold có thể yêu cầu agent inspect file trước khi sửa, chia nhỏ bài toán, tự kiểm tra trước khi xong, v.v.</li>
+    <li><strong>Tool có sẵn và giao diện tương ứng</strong> — gồm tài liệu và output agent thấy sau mỗi command.</li>
+    <li><strong>Cấu trúc hệ thống</strong>: Có dùng sub-agent hay multi-agent không.</li>
+    <li><strong>Chiến lược quản lý context</strong> trong các bài toán chạy dài với context window hữu hạn.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="callout-label">Insight quan trọng</span>
+    <h5>Tách bạch hiệu năng model & scaffold là rất khó</h5>
+    <p>Hiệu năng kém có thể đến từ <em>khả năng mô hình thiếu</em>, <em>thiết kế scaffold tệ</em>, hoặc cả hai. Khi đánh giá agent, <strong>ta đang đánh giá khả năng làm việc cùng nhau giữa model và scaffold</strong>. Scaffold có tác động đáng kể đến hiệu năng. Mô hình kém hơn thường hoạt động tốt hơn khi được ghép với scaffold phù hợp với tendency của nó, và ngược lại.</p>
+  </div>
+</article>
+
+<!-- ===== EVAL PATTERNS ===== -->
+<article class="section" id="eval-patterns">
+  <span class="section-num">Phần 08 · Quy trình đánh giá</span>
+  <h2>Các mô hình phổ biến trong <em>đánh giá agent</em></h2>
+
+  <p>Một <strong>evaluation</strong> (đánh giá) là tập các bài kiểm tra cung cấp input cho agent, thu thập output, và áp dụng logic chấm điểm để xác định agent có thành công không. Ta đánh giá agent bằng cách tạo <strong>evaluation suite</strong> (bộ đánh giá) gồm các bài kiểm tra đa dạng phản ánh cách agent được dùng trong thực tế.</p>
+
+  <p>Đánh giá agent <em>khác với benchmark đơn lượt</em> truyền thống cho LLM. Đánh giá agent liên quan đến tương tác với tool và môi trường ngoài qua nhiều lượt chat để hoàn thành task. Để xử lý các đánh giá tương tác chạy dài này, ta phải tạo <strong>evaluation harness</strong> (khung đánh giá) quản lý toàn bộ quy trình end-to-end.</p>
+
+  <h3>8.1 — Các thành phần của một đánh giá Agent</h3>
+
+  <div class="diagram">
+    <div class="diagram-label">Hình 05</div>
+    <div class="diagram-title">Các thành phần của một đánh giá Agent</div>
+    <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+      <!-- Task -->
+      <g>
+        <rect x="40" y="40" width="180" height="100" rx="6" fill="#1A1814"/>
+        <text x="130" y="70" text-anchor="middle" fill="#F2D896" font-family="JetBrains Mono" font-size="10" font-weight="600">TASK</text>
+        <text x="130" y="95" text-anchor="middle" fill="#F5F1E8" font-family="Be Vietnam Pro" font-size="13" font-weight="600">Bài kiểm tra</text>
+        <text x="130" y="116" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="11">Có input và</text>
+        <text x="130" y="130" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="11">tiêu chí output</text>
+      </g>
+      
+      <!-- Trial -->
+      <g>
+        <rect x="260" y="40" width="180" height="100" rx="6" fill="#B8431C"/>
+        <text x="350" y="70" text-anchor="middle" fill="#F2D896" font-family="JetBrains Mono" font-size="10" font-weight="600">TRIAL</text>
+        <text x="350" y="95" text-anchor="middle" fill="#FBF8F1" font-family="Be Vietnam Pro" font-size="13" font-weight="600">Lần thử</text>
+        <text x="350" y="116" text-anchor="middle" fill="#FBF8F1" font-family="Be Vietnam Pro" font-size="11">Mỗi lần agent</text>
+        <text x="350" y="130" text-anchor="middle" fill="#FBF8F1" font-family="Be Vietnam Pro" font-size="11">cố giải một task</text>
+      </g>
+      
+      <!-- Transcript -->
+      <g>
+        <rect x="480" y="40" width="180" height="100" rx="6" fill="#F2D896" stroke="#1A1814" stroke-width="1.5"/>
+        <text x="570" y="70" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">TRANSCRIPT</text>
+        <text x="570" y="95" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="13" font-weight="600">Bản ghi quá trình</text>
+        <text x="570" y="116" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="11">Tool call, suy luận,</text>
+        <text x="570" y="130" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="11">output trung gian</text>
+      </g>
+      
+      <!-- Outcome -->
+      <g>
+        <rect x="150" y="180" width="180" height="100" rx="6" fill="#FBF8F1" stroke="#B8431C" stroke-width="1.5"/>
+        <text x="240" y="210" text-anchor="middle" fill="#B8431C" font-family="JetBrains Mono" font-size="10" font-weight="600">OUTCOME</text>
+        <text x="240" y="235" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="13" font-weight="600">Kết quả cuối</text>
+        <text x="240" y="256" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="11">Trạng thái cuối của</text>
+        <text x="240" y="270" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="11">môi trường bên ngoài</text>
+      </g>
+      
+      <!-- Grader -->
+      <g>
+        <rect x="370" y="180" width="180" height="100" rx="6" fill="#2D5F5D"/>
+        <text x="460" y="210" text-anchor="middle" fill="#F2D896" font-family="JetBrains Mono" font-size="10" font-weight="600">GRADER</text>
+        <text x="460" y="235" text-anchor="middle" fill="#FBF8F1" font-family="Be Vietnam Pro" font-size="13" font-weight="600">Bộ chấm điểm</text>
+        <text x="460" y="256" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="11">Kiểm tra transcript</text>
+        <text x="460" y="270" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="11">và outcome</text>
+      </g>
+
+      <!-- Lines -->
+      <line x1="220" y1="90" x2="256" y2="90" stroke="#3A3530" stroke-width="1.5"/>
+      <line x1="440" y1="90" x2="476" y2="90" stroke="#3A3530" stroke-width="1.5"/>
+      <line x1="350" y1="140" x2="350" y2="160" stroke="#3A3530" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <line x1="240" y1="160" x2="240" y2="176" stroke="#3A3530" stroke-width="1.5" stroke-dasharray="3 3"/>
+      <line x1="460" y1="160" x2="460" y2="176" stroke="#3A3530" stroke-width="1.5" stroke-dasharray="3 3"/>
+    </svg>
+  </div>
+
+  <p>Tóm tắt các thành phần:</p>
+  <ul>
+    <li><strong>Tasks (Bài kiểm tra)</strong>: các test case riêng cho agent, với input và tiêu chí output xác định trước.</li>
+    <li><strong>Trial (Lần thử)</strong>: mỗi lần agent giải một task. Thường chạy nhiều trial cho mỗi task để có kết quả nhất quán.</li>
+    <li><strong>Transcript (Bản ghi)</strong>: trace/trajectory chứa output, tool call, các bước suy luận, output trung gian, và mọi tương tác của agent.</li>
+    <li><strong>Outcome (Kết quả)</strong>: trạng thái cuối của <em>môi trường ngoài</em> sau khi trial xong.</li>
+    <li><strong>Grader (Bộ chấm điểm)</strong>: chấm kết quả trial bằng cách áp dụng kiểm tra cụ thể lên transcript hoặc outcome.</li>
+  </ul>
+
+  <div class="callout">
+    <span class="callout-label">Phân biệt quan trọng</span>
+    <h5>Outcome ≠ Output</h5>
+    <p>Outcome khác output vì nó chỉ trạng thái <em>cuối cùng của môi trường</em>, không phải chỉ text mà agent tạo ra. Ví dụ test khả năng đặt chỗ — outcome mong muốn là <strong>một đặt chỗ đã xác nhận thực sự tồn tại</strong>. Agent có thể viết "Đã đặt nhà hàng!" mà không thực sự đạt được outcome đó.</p>
+  </div>
+</article>
+
+<!-- ===== GRADERS ===== -->
+<article class="section" id="graders">
+  <span class="section-num">Phần 09 · Chấm điểm</span>
+  <h2>Các loại <em>bộ chấm điểm</em></h2>
+
+  <p>Grader nhận transcript và outcome của trial làm input và thực hiện kiểm tra chất lượng. Nhiều loại grader có thể dùng, và lựa chọn tốt nhất phụ thuộc vào ứng dụng.</p>
+
+  <h3>9.1 — Đánh giá bởi con người (Human Evaluation)</h3>
+
+  <p><strong>Human evaluation là chuẩn vàng</strong> để đo chất lượng, nên nhiều dự án bắt đầu với human eval đơn giản — như inspection thủ công hay vibe check — như bước đầu tiên. Tuy nhiên, thu thập feedback của con người vừa khó vừa đắt.</p>
+
+  <blockquote>
+    "Claude Code khởi đầu với iteration nhanh dựa trên feedback từ nhân viên Anthropic và external user. Sau đó, chúng tôi thêm eval — đầu tiên cho các vùng hẹp như độ ngắn gọn và sửa file, rồi cho hành vi phức tạp hơn như over-engineering."
+    <cite>— Anthropic [1]</cite>
+  </blockquote>
+
+  <p>Để thu thập feedback chất lượng cao ở quy mô, ta phải <strong>calibrate</strong> quy trình human evaluation. Một số task khách quan hơn, dễ calibrate. Nhưng đánh giá thường rất chủ quan — <em>các đánh giá viên hiếm khi đồng ý với nhau</em> nếu không đầu tư công sức tinh chỉnh guideline.</p>
+
+  <h3>9.2 — Đánh giá tự động (Automatic Graders)</h3>
+
+  <p>Có thể chia thành 2 loại:</p>
+
+  <div class="compare">
+    <div class="compare-card">
+      <h6>Code-based (Dựa trên code)</h6>
+      <p>Heuristic check viết trong Python function. Ví dụ: string matching, assertion trên outcome/transcript, test case predefined, kiểm tra tool được gọi, metrics truyền thống như ROUGE/BLEU.</p>
+      <p style="margin-top:12px"><strong>Ưu</strong>: Hiệu quả, có thể tái tạo, dễ debug.<br><strong>Nhược</strong>: Thường cần ground truth, ít linh hoạt, khó nắm khía cạnh chủ quan.</p>
+    </div>
+    <div class="compare-card">
+      <h6>Model-based (LLM-as-Judge)</h6>
+      <p>Prompt một LLM để đánh giá khía cạnh chất lượng. Đặc biệt hiệu quả cho tiêu chí mở (như "code có đủ sạch không?", "lời giải có elegant không?").</p>
+      <p style="margin-top:12px"><strong>Ưu</strong>: Linh hoạt, xử lý được chủ quan.<br><strong>Nhược</strong>: Không deterministic, có biases, đắt hơn code-based.</p>
+    </div>
+  </div>
+
+  <h4>3 thiết lập chấm điểm phổ biến cho LLM-as-a-Judge</h4>
+  <div class="steps">
+    <div class="step">
+      <h6>Pairwise (preference) scoring</h6>
+      <p>Judge nhận prompt và <strong>hai response</strong>, được yêu cầu chọn response nào tốt hơn.</p>
+    </div>
+    <div class="step">
+      <h6>Direct assessment (pointwise) scoring</h6>
+      <p>Judge nhận <strong>một response</strong> cho prompt và được yêu cầu chấm điểm (ví dụ thang Likert 1-5).</p>
+    </div>
+    <div class="step">
+      <h6>Reference-guided scoring</h6>
+      <p>Judge nhận <strong>thêm reference vàng</strong> cùng prompt và response để hỗ trợ chấm điểm. Có thể kết hợp với pairwise hoặc pointwise.</p>
+    </div>
+  </div>
+
+  <h3>9.3 — "Phô mai Thụy Sĩ" — Kết hợp nhiều phương pháp</h3>
+
+  <p>Vì LLM judge có biases, ta không nên chỉ dựa vào model-based. Tốt hơn là <strong>kết hợp nhiều kỹ thuật chấm điểm</strong>. Human evaluation làm tín hiệu cốt lõi. Model-based grader có thể được calibrate dựa trên sự đồng ý với human eval để chạy ở quy mô lớn. Code-based grader dùng cho các check deterministic.</p>
+
+  <blockquote>
+    "Đội ngũ hiệu quả kết hợp các phương pháp: <em>automated eval</em> để iterate nhanh, <em>production monitoring</em> để có ground truth, và <em>human review định kỳ</em> để calibrate."
+    <cite>— Anthropic [1]</cite>
+  </blockquote>
+
+  <p>Một đánh giá đơn lẻ không bắt hết mọi lỗi, nhưng xác suất một lỗi đến tay user giảm khi có nhiều lớp đánh giá bổ sung — như nhiều lớp phô mai Thụy Sĩ, các lỗ trên mỗi lớp ít khi trùng nhau:</p>
+
+  <div class="pills">
+    <span class="pill">Automated eval</span>
+    <span class="pill">Manual inspection</span>
+    <span class="pill">Production monitoring</span>
+    <span class="pill">A/B testing</span>
+    <span class="pill">User feedback</span>
+    <span class="pill">Cost metrics</span>
+  </div>
+</article>
+
+<!-- ===== TAU BENCH ===== -->
+<article class="section" id="tau-bench">
+  <span class="section-num">Phần 10 · Case Study #1</span>
+  <h2>Bộ benchmark <em>τ-bench</em></h2>
+
+  <blockquote>
+    "Chúng tôi đề xuất τ-bench, một benchmark mô phỏng các hội thoại động giữa user (mô phỏng bằng LLM) và một language agent được cung cấp các tool API đặc thù lĩnh vực và policy guideline."
+    <cite>— τ-bench [8]</cite>
+  </blockquote>
+
+  <p><strong>τ-bench</strong> đánh giá agent qua hội thoại nhiều lượt động với user, trong các lĩnh vực thực tế. Ban đầu, hai lĩnh vực cụ thể được chọn: <em>retail (bán lẻ) và airline (hàng không)</em>. Trong mỗi lĩnh vực, agent phải:</p>
+
+  <ul>
+    <li>Tương tác với user và xác định ý định</li>
+    <li>Tuân thủ tập policy/quy tắc cho mỗi lĩnh vực</li>
+    <li>Dùng tool để retrieve dữ liệu và sửa đổi môi trường</li>
+  </ul>
+
+  <p>Thông tin cần để giải task <em>không được cung cấp toàn bộ ngay từ đầu</em> mà phải khám phá qua hội thoại với user. Vì hội thoại với người thật khó scale, mọi tương tác user trong τ-bench đều được mô phỏng bằng LLM.</p>
+
+  <h3>10.1 — Kiến trúc 4 thành phần</h3>
+
+  <div class="diagram">
+    <div class="diagram-label">Hình 06</div>
+    <div class="diagram-title">Kiến trúc τ-bench</div>
+    <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#3A3530"/>
+        </marker>
+      </defs>
+      <!-- Agent -->
+      <rect x="40" y="120" width="140" height="80" rx="6" fill="#1A1814" stroke="#B8431C" stroke-width="2"/>
+      <text x="110" y="148" text-anchor="middle" fill="#F2D896" font-family="JetBrains Mono" font-size="10" font-weight="600">AGENT</text>
+      <text x="110" y="170" text-anchor="middle" fill="#F5F1E8" font-family="Be Vietnam Pro" font-size="13" font-weight="600">LLM-based</text>
+      <text x="110" y="188" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="11">Service agent</text>
+
+      <!-- User simulator -->
+      <rect x="520" y="120" width="140" height="80" rx="6" fill="#B8431C"/>
+      <text x="590" y="148" text-anchor="middle" fill="#F2D896" font-family="JetBrains Mono" font-size="10" font-weight="600">USER</text>
+      <text x="590" y="170" text-anchor="middle" fill="#FBF8F1" font-family="Be Vietnam Pro" font-size="13" font-weight="600">LLM-simulated</text>
+      <text x="590" y="188" text-anchor="middle" fill="#FBF8F1" font-family="Be Vietnam Pro" font-size="11">User</text>
+
+      <!-- Conversation -->
+      <text x="350" y="145" text-anchor="middle" fill="#6B635A" font-family="Be Vietnam Pro" font-size="11" font-style="italic">Hội thoại tự nhiên</text>
+      <line x1="190" y1="160" x2="510" y2="160" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr4)" marker-start="url(#arr4)"/>
+
+      <!-- Policy Document -->
+      <rect x="40" y="30" width="140" height="60" rx="6" fill="#F2D896" stroke="#1A1814" stroke-width="1.5"/>
+      <text x="110" y="55" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="11" font-weight="600">📋 Policy Doc</text>
+      <text x="110" y="75" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="10">Quy tắc cho lĩnh vực</text>
+      <line x1="110" y1="90" x2="110" y2="118" stroke="#3A3530" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arr4)"/>
+
+      <!-- Tools/APIs -->
+      <rect x="40" y="230" width="140" height="60" rx="6" fill="#FBF8F1" stroke="#1A1814" stroke-width="1.5"/>
+      <text x="110" y="255" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="11" font-weight="600">🔧 APIs / Tools</text>
+      <text x="110" y="275" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="10">Đọc/ghi database</text>
+      <line x1="110" y1="200" x2="110" y2="228" stroke="#3A3530" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arr4)" marker-start="url(#arr4)"/>
+
+      <!-- Database -->
+      <rect x="270" y="230" width="160" height="60" rx="6" fill="#2D5F5D"/>
+      <text x="350" y="255" text-anchor="middle" fill="#F2D896" font-family="Be Vietnam Pro" font-size="11" font-weight="600">🗄️ Database</text>
+      <text x="350" y="275" text-anchor="middle" fill="#E8C4AC" font-family="Be Vietnam Pro" font-size="10">JSON entries</text>
+      <line x1="180" y1="260" x2="266" y2="260" stroke="#3A3530" stroke-width="1.5" marker-end="url(#arr4)" marker-start="url(#arr4)"/>
+
+      <!-- Task instruction -->
+      <rect x="520" y="30" width="140" height="60" rx="6" fill="#EFE9DB" stroke="#1A1814" stroke-width="1.5"/>
+      <text x="590" y="55" text-anchor="middle" fill="#1A1814" font-family="Be Vietnam Pro" font-size="11" font-weight="600">📝 Task Instruction</text>
+      <text x="590" y="75" text-anchor="middle" fill="#3A3530" font-family="Be Vietnam Pro" font-size="10">"Đổi bàn phím..."</text>
+      <line x1="590" y1="90" x2="590" y2="118" stroke="#3A3530" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arr4)"/>
+    </svg>
+  </div>
+
+  <p>τ-bench gồm 4 thành phần modular:</p>
+  <ol>
+    <li><strong>Databases</strong> (nhiều cho mỗi lĩnh vực) với entry JSON</li>
+    <li><strong>APIs</strong> để tương tác (đọc/ghi) database với tool call dạng <code>tool_name(**kwargs)</code></li>
+    <li><strong>Policy documents</strong> đặc thù lĩnh vực — chứa quy tắc agent phải tuân theo</li>
+    <li><strong>User simulator</strong> chạy bởi LLM, tương tác với agent</li>
+  </ol>
+
+  <div class="callout">
+    <span class="callout-label">Ví dụ instruction cho user simulator</span>
+    <p><em>"Bạn là Yusuf Rossi ở 19122. Bạn vừa nhận đơn #W2378156 và muốn đổi bàn phím cơ sang loại tương tự nhưng có công tắc clicky, và đổi smart thermostat sang loại tương thích Google Home thay vì Apple HomeKit. Nếu không có bàn phím clicky, RGB backlight, full size, bạn sẽ chọn không có backlight. Bạn là người chi tiết và muốn đảm bảo mọi thứ được giải quyết trong một lần."</em></p>
+  </div>
+
+  <h3>10.2 — Đo lường thành công</h3>
+
+  <p>Mỗi task có:</p>
+  <ul>
+    <li>Một <strong>instruction cho user simulation</strong></li>
+    <li>Annotation <strong>ground truth các write action</strong> vào database</li>
+    <li>Annotation <strong>ground truth output</strong> cho câu hỏi của user</li>
+  </ul>
+
+  <p>Ta xác định agent thành công bằng cách so sánh các action và outcome ground truth với transcript và outcome của agent. Ví dụ với task đổi/trả bình nước:</p>
+  <ul>
+    <li>Agent có thực hiện write action để trả đúng item bằng đúng payment method không?</li>
+    <li>Agent có output đúng các string <code>54.04</code> và <code>41.64</code> — hai mức giá liên quan đến giao dịch của user?</li>
+  </ul>
+
+  <h3>10.3 — Xử lý tính không xác định: Pass@K vs Pass^K</h3>
+
+  <p>Mỗi trial trong τ-bench là <em>ngẫu nhiên</em>: user simulator và agent đều sample completion, nên cùng một task có thể dẫn đến các transcript khác nhau. Để xử lý variation, τ-bench chạy nhiều trial độc lập cho mỗi task.</p>
+
+  <div class="compare">
+    <div class="compare-card">
+      <h6>Pass@K</h6>
+      <p>Xác suất agent giải được task <em>ít nhất một lần</em> qua K lần thử độc lập. Tăng khi K tăng.</p>
+    </div>
+    <div class="compare-card">
+      <h6>Pass^K (Pass-hat-K) — Khắt khe hơn</h6>
+      <p>Xác suất agent thành công trên <em>tất cả</em> K lần thử độc lập. Giảm nhanh khi K tăng. Đo lường <strong>tính nhất quán và độ tin cậy</strong>.</p>
+    </div>
+  </div>
+
+  <blockquote>
+    "Với các task agent thực tế đòi hỏi độ tin cậy và nhất quán như customer service, chúng tôi đề xuất metric mới — pass^k (pass hat k), định nghĩa là <em>xác suất tất cả k trial i.i.d. của task đều thành công</em>, lấy trung bình qua các task."
+    <cite>— τ-bench [8]</cite>
+  </blockquote>
+
+  <p>Pass^K không khoan dung và bắt khả năng agent thực hiện <strong>nhất quán qua mọi trial</strong>. Thú vị là hầu hết agent đều có Pass^K kém, kể cả với K không lớn. Tuy nhiên, nhiều benchmark gần đây — kể cả những cái ra đời sau τ-bench — vẫn không dùng metric này, thường report Pass@K hoặc Avg@K.</p>
+
+  <h3>10.4 — Tiến hóa: τ²-bench và τ³-bench</h3>
+
+  <p><strong>τ²-bench</strong>: trong τ-bench gốc, chỉ agent có tool. τ²-bench dùng setup <em>dual-control</em> — cả user và agent đều có thể tương tác với môi trường ngoài qua tool. Ví dụ: giải task customer support có thể đòi hỏi user troubleshoot cùng agent. Một <strong>Telecom domain</strong> mới được tạo cho setup này.</p>
+
+  <p><strong>τ²-bench-verified</strong>: phát hiện và sửa các vấn đề chất lượng task trong τ-bench gốc — như task không tuân thủ policy, data conflict, instruction mơ hồ. Sau khi sửa, vài model top có hiệu năng (Avg@5) trên 80% qua các domain.</p>
+
+  <p><strong>τ³-bench</strong>: thêm domain <em>τ-banking</em> mới đòi hỏi agent <strong>tự tìm</strong> policy và tool liên quan trong knowledge base ~700 documents, thay vì được cho sẵn. Phức tạp hơn nhiều, hiệu năng giảm rõ rệt.</p>
+</article>
+
+<!-- ===== TERMINAL BENCH ===== -->
+<article class="section" id="terminal-bench">
+  <span class="section-num">Phần 11 · Case Study #2</span>
+  <h2><em>Terminal-Bench</em> — Đánh giá agent trên terminal</h2>
+
+  <blockquote>
+    "Benchmark phải... tiến hóa để bắt được sự đa dạng và độ khó của các task frontier trong môi trường thực tế... Một môi trường như vậy là terminal: giao diện phổ biến, linh hoạt và mạnh mẽ, được dùng cho công việc giá trị cao như software engineering, scientific computing, cybersecurity, và machine learning."
+    <cite>— Terminal-Bench [12]</cite>
+  </blockquote>
+
+  <p>Khi agent ngày càng mạnh, đánh giá khả năng của chúng trở nên phức tạp hơn vì ta cần task đủ khó để đo năng lực frontier. Các task này phải tồn tại trong <strong>môi trường thực tế</strong> cho phép agent hành động độc lập trong khoảng thời gian dài, ở những lĩnh vực rủi ro cao. Terminal là môi trường hoàn hảo nhờ tính phổ quát và mở rộng.</p>
+
+  <h3>11.1 — Cấu trúc 4 phần của một Task</h3>
+
+  <div class="steps">
+    <div class="step">
+      <h6>Instruction (Hướng dẫn)</h6>
+      <p>Mô tả task agent phải hoàn thành và chỉ định <em>giới hạn thời gian</em>.</p>
+    </div>
+    <div class="step">
+      <h6>Docker Image</h6>
+      <p>Môi trường cho task, được khởi tạo với các package và file liên quan.</p>
+    </div>
+    <div class="step">
+      <h6>Test Set</h6>
+      <p>Thực thi tập kiểm tra deterministic để xác minh task trong instruction đã hoàn thành thành công.</p>
+    </div>
+    <div class="step">
+      <h6>Reference Solution (Oracle)</h6>
+      <p>Lời giải viết thủ công cho task — chứng minh task khả thi và giúp debug.</p>
+    </div>
+  </div>
+
+  <blockquote>
+    "Test verify rằng tất cả các outcome mô tả trong instruction đã đạt được bằng cách <em>kiểm tra thuộc tính của trạng thái container cuối</em>; chúng không test các command hoặc console output của agent... Terminal-Bench là framework outcome-driven nơi mỗi agent tự do hoàn thành task bằng nhiều cách tiếp cận."
+    <cite>— Terminal-Bench [12]</cite>
+  </blockquote>
+
+  <h3>11.2 — Quy trình curation kỹ lưỡng</h3>
+
+  <p>Tất cả 89 task trong Terminal-Bench 2.0 được crowdsource từ 93 contributor (229 task được gửi). Task lấy cảm hứng từ workflow thực tế, đa dạng: train ML model, migrate code COBOL → Python, build Linux từ source. Task được đánh giá theo:</p>
+
+  <div class="compare">
+    <div class="compare-card">
+      <h6>Specificity (Tính cụ thể)</h6>
+      <p>Instruction phải mô tả mọi end-state khả thi. Test set pass khi và chỉ khi container kết thúc ở trạng thái khả thi.</p>
+    </div>
+    <div class="compare-card">
+      <h6>Solvability (Tính giải được)</h6>
+      <p>Test case phải có thể pass — kiểm chứng bằng cách chạy oracle solution.</p>
+    </div>
+  </div>
+  <div class="compare">
+    <div class="compare-card">
+      <h6>Integrity (Toàn vẹn)</h6>
+      <p>Task <em>không thể giải bằng gian lận hay shortcut</em>.</p>
+    </div>
+    <div class="compare-card">
+      <h6>Quy trình verification</h6>
+      <p>3 human evaluator + automated workflow + adversarial exploit agent. <strong>~3 giờ reviewer trên mỗi task</strong> trong benchmark cuối cùng.</p>
+    </div>
+  </div>
+
+  <h3>11.3 — Kết quả Agent</h3>
+
+  <p>Hiệu năng trên Terminal-Bench phụ thuộc vào scaffold đang dùng. Khả năng model có tác động lớn hơn scaffold, nhưng scaffold cũng ảnh hưởng đáng kể. <strong>Model đóng (closed) liên tục đánh bại model mở (open)</strong>:</p>
+
+  <div class="callout">
+    <span class="callout-label">Số liệu hiệu năng</span>
+    <p><strong>Kimi K2 Thinking</strong> (open): tỉ lệ giải <strong>chỉ 35.7%</strong></p>
+    <p><strong>GPT-5.2</strong> (closed): tỉ lệ giải <strong>62.9%</strong></p>
+    <p>Terminal-Bench 2.0 gần saturation với các model mới — Terminal-Bench 3.0 đang được phát triển.</p>
+  </div>
+</article>
+
+<!-- ===== OTHER BENCHMARKS ===== -->
+<article class="section" id="other-benchmarks">
+  <span class="section-num">Phần 12 · Tham khảo</span>
+  <h2>Các benchmark agent <em>hữu ích khác</em></h2>
+
+  <p>Ngoài τ-bench và Terminal-Bench, có nhiều benchmark chất lượng cao khác đã được đề xuất gần đây. Tóm tắt các công trình đáng chú ý:</p>
+
+  <table>
+    <tr><th>Benchmark</th><th>Lĩnh vực &amp; mục tiêu</th></tr>
+    <tr><td><strong>GAIA &amp; GAIA-2</strong></td><td>Trợ lý tổng quát đòi hỏi suy luận, duyệt web, dùng tool, xử lý multimodal data.</td></tr>
+    <tr><td><strong>AgentCompany</strong></td><td>Knowledge work — agent mô phỏng công ty phần mềm nhỏ: duyệt info, viết code, nói chuyện với nhau để hoàn thành task.</td></tr>
+    <tr><td><strong>WorkArena</strong></td><td>Đánh giá khả năng giải workflow phần mềm doanh nghiệp lấy từ ServiceNow.</td></tr>
+    <tr><td><strong>OSWorld</strong></td><td>Computer-use — test khả năng giải task desktop thực tế. Có nhiều biến thể như OfficeBench, MobileBench.</td></tr>
+    <tr><td><strong>MLE-Bench</strong></td><td>Thí nghiệm tự động — agent giải các bài ML từ Kaggle. Cũng có PostTrainBench, MLGym.</td></tr>
+    <tr><td><strong>PaperBench</strong></td><td>ML benchmark — test khả năng agent <em>tái tạo paper nghiên cứu AI từ arXiv</em>.</td></tr>
+    <tr><td><strong>SpreadsheetBench</strong></td><td>Test khả năng thao tác spreadsheet Excel của agent.</td></tr>
+    <tr><td><strong>HIL-Bench</strong></td><td>Human-in-the-loop — agent có biết khi nào nên hỏi người dùng để làm rõ task không?</td></tr>
+    <tr><td><strong>GDPval</strong></td><td>Benchmark thực tế — test khả năng giải các task có giá trị kinh tế cao.</td></tr>
+  </table>
+</article>
+
+<!-- ===== ROADMAP ===== -->
+<article class="section" id="roadmap">
+  <span class="section-num">Phần 13 · Thực hành</span>
+  <h2>Lộ trình xây dựng <em>đánh giá agent</em> của riêng bạn</h2>
+
+  <p>Để kết thúc, đây là <strong>tóm tắt từng bước</strong> cách tiếp cận curation một evaluation suite cho agent của bạn — áp dụng các khái niệm xuyên suốt bài viết.</p>
+
+  <div class="steps">
+    <div class="step">
+      <h6>Định nghĩa thành công</h6>
+      <p>Trước khi curate task, hãy nghĩ thành công có nghĩa là gì. Tiêu chí phải chi tiết và rõ ràng. Bao gồm <strong>outcome goals</strong> (kiểm tra trạng thái cuối — ví dụ entry database có được tạo) và <strong>process goals</strong> (kiểm tra các thành phần trong transcript — ví dụ certain tool có được gọi). Nhiều benchmark hiện nay hướng nặng về outcome vì khách quan và đáng tin hơn.</p>
+    </div>
+    <div class="step">
+      <h6>Thu thập tập task nhỏ</h6>
+      <p>Bắt đầu với <strong>10-20 task</strong> tự curate bằng tay. Đủ để phát hiện vấn đề rõ ràng. Khi tìm thấy failure case mới qua quá trình sử dụng, ghi lại và thêm vào suite. Khi agent cải thiện, thêm các task khó hơn. Giữ task cũ trong "regression set".</p>
+    </div>
+    <div class="step">
+      <h6>Tạo task hữu ích</h6>
+      <p>Task phải đủ rõ để các lần đánh giá lặp lại cho kết quả nhất quán. Task mơ hồ hoặc nhiễu sẽ làm phức tạp đánh giá với kết quả không ổn định và misleading — <em>không thể cải thiện agent nếu kết quả mỗi lần chạy lại dao động</em>.</p>
+    </div>
+    <div class="step">
+      <h6>Cung cấp ground truth &amp; reference</h6>
+      <p>Khi có thể, mỗi task nên có <strong>reference solution hoặc known-good trajectory</strong>. Điều này chứng minh task khả thi, verify grader đang check đúng thứ, và hữu ích để debug.</p>
+    </div>
+    <div class="step">
+      <h6>Cấu hình graders</h6>
+      <p>Bắt đầu với grader đơn giản — code-based deterministic check. Cho các tiêu chí chủ quan (style, có theo rubric không), dùng model-based grader hoặc human review. Luôn monitor mức đồng ý giữa LLM judge và human expert.</p>
+    </div>
+    <div class="step">
+      <h6>Xây dựng evaluation harness</h6>
+      <p>Khi đã có vài task, ta cần thực thi đánh giá hiệu quả và lặp lại được. Harness phải: chạy agent trong setup thực tế (nhưng có kiểm soát), thu thập transcript (gồm tool call, output trung gian), capture outcome cuối. <strong>Mỗi trial nên bắt đầu từ môi trường fresh</strong> để tránh shared state.</p>
+    </div>
+    <div class="step">
+      <h6>Inspect, iterate, maintain</h6>
+      <p>Evaluation agent có thể bị saturate nhanh, nên hãy coi suite như <strong>artifact sống</strong> — liên tục cải thiện về độ khó, đa dạng và độ tin cậy. Sau khi chạy benchmark, inspect transcript để verify failure. Agent nên fail vì <em>lỗi thật</em>, không phải vì vấn đề task. Tiếp tục thêm task mới khi agent được dùng trong thực tế.</p>
+    </div>
+  </div>
+
+  <div class="callout" style="border-color:var(--accent);background:linear-gradient(135deg,var(--paper),var(--accent-soft))">
+    <span class="callout-label">Tóm gọn</span>
+    <h5>Triết lý cốt lõi</h5>
+    <p><strong>Đánh giá tốt nhất tiến hóa liên tục</strong> qua failure case mới và bảo trì thường xuyên. Đừng coi evaluation suite là sản phẩm xong xuôi — coi nó là một sinh vật sống, phát triển cùng với agent của bạn.</p>
+  </div>
+</article>
+
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="foot-title">Hết bài</div>
+  <p>Bài viết gốc bằng tiếng Anh: <a href="https://cameronrwolfe.substack.com/p/agent-evals">"Agent Evaluation: A Detailed Guide" — Cameron R. Wolfe, Ph.D.</a></p>
+  <p>Đăng trên Deep (Learning) Focus, tháng 5/2026.</p>
+  <p style="margin-top:24px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted)">Bản dịch tiếng Việt · Phiên bản tham khảo phi thương mại</p>
+</footer>
+
+</body>
+</html>
